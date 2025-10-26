@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block title %}Join Aura - Intelligent Social Platform{% endblock %}
+
+{% block styles %}
+<style>
+    .auth-container {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 0;
+    }
+    
+    .auth-box {
+        width: 100%;
+        max-width: 400px;
+    }
+    
+    .auth-logo {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .auth-logo h1 {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .auth-logo p {
+        color: var(--text-muted);
+    }
+    
+    .tabs {
+        display: flex;
+        margin-bottom: 2rem;
+        background: rgba(42, 45, 122, 0.2);
+        border-radius: 12px;
+        padding: 4px;
+    }
+    
+    .tab {
+        flex: 1;
+        padding: 0.75rem;
+        text-align: center;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-weight: 500;
+    }
+    
+    .tab.active {
+        background: var(--primary);
+        color: white;
+    }
+    
+    .error-message {
+        background: rgba(255, 0, 0, 0.1);
+        border: 1px solid rgba(255, 0, 0, 0.3);
+        color: var(--danger);
+        padding: 0.75rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        display: none;
+    }
+    
+    .auth-features {
+        margin-top: 2rem;
+        text-align: center;
+    }
+    
+    .feature-list {
+        list-style: none;
+        margin-top: 1rem;
+    }
+    
+    .feature-list li {
+        padding: 0.5rem 0;
+        color: var(--text-muted);
+    }
+    
+    .feature-list li:before {
+        content: "✓";
+        color: var(--accent);
+        margin-right: 0.5rem;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-box">
+        <div class="auth-logo">
+            <h1>AURA</h1>
+            <p>The Future of Social Connection</p>
+        </div>
+        
+        <div class="card">
+            <div class="tabs">
+                <div class="tab active" onclick="showTab('login')">Login</div>
+                <div class="tab" onclick="showTab('register')">Register</div>
+            </div>
+            
+            <div class="error-message" id="errorMessage"></div>
+            
+            <!-- Login Form -->
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginUsername" class="form-label">Username</label>
+                    <input type="text" id="loginUsername" class="form-control" placeholder="Enter your username" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword" class="form-label">Password</label>
+                    <input type="password" id="loginPassword" class="form-control" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Sign In to Aura</button>
+            </form>
+            
+            <!-- Register Form -->
+            <form id="registerForm" style="display: none;">
+                <div class="form-group">
+                    <label for="regUsername" class="form-label">Username</label>
+                    <input type="text" id="regUsername" class="form-control" placeholder="Choose a username" required>
+                </div>
+                <div class="form-group">
+                    <label for="regEmail" class="form-label">Email</label>
+                    <input type="email" id="regEmail" class="form-control" placeholder="your@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="regDisplayName" class="form-label">Display Name</label>
+                    <input type="text" id="regDisplayName" class="form-control" placeholder="How people see you" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPassword" class="form-label">Password</label>
+                    <input type="password" id="regPassword" class="form-control" placeholder="Create a password" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Create Aura Account</button>
+            </form>
+        </div>
+        
+        <div class="auth-features">
+            <p>Join the intelligent social platform</p>
+            <ul class="feature-list">
+                <li>Focus Flow Feeds</li>
+                <li>Real-time Messaging</li>
+                <li>Smart Channels</li>
+                <li>Context-Aware AI</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function showTab(tabName) {
+        // Update tabs
+        document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        // Show correct form
+        if (tabName === 'login') {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+        } else {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+        }
+        
+        // Clear error
+        hideError();
+    }
+    
+    function showError(message) {
+        const errorDiv = document.getElementById('errorMessage');
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+    }
+    
+    function hideError() {
+        document.getElementById('errorMessage').style.display = 'none';
+    }
+    
+    // Login form handler
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const username = document.getElementById('loginUsername').value;
+        const password = document.getElementById('loginPassword').value;
+        
+        try {
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username, password})
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                showNotification('Welcome back!', 'success');
+                setTimeout(() => window.location.href = '/', 1000);
+            } else {
+                showError(result.error || 'Login failed');
+            }
+        } catch (error) {
+            showError('Network error. Please try again.');
+        }
+    });
+    
+    // Register form handler
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const username = document.getElementById('regUsername').value;
+        const email = document.getElementById('regEmail').value;
+        const display_name = document.getElementById('regDisplayName').value;
+        const password = document.getElementById('regPassword').value;
+        
+        try {
+            const response = await fetch('/api/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username, email, display_name, password})
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                showNotification('Account created successfully!', 'success');
+                setTimeout(() => window.location.href = '/', 1000);
+            } else {
+                showError(result.error || 'Registration failed');
+            }
+        } catch (error) {
+            showError('Network error. Please try again.');
+        }
+    });
+</script>
+{% endblock %}

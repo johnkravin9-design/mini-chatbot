@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Aura Social - The Future</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        :root {
+            --primary: #2A2D7A;
+            --accent: #00F5A0;
+            --background: #0F0F1A;
+            --surface: #1E1E2E;
+            --text: #E2E2E8;
+            --text-muted: #8B8B9E;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: var(--background);
+            color: var(--text);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: var(--surface);
+            padding: 1rem;
+            text-align: center;
+            border-bottom: 2px solid var(--primary);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, var(--accent), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        
+        .tagline {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        .post-form {
+            background: var(--surface);
+            padding: 1.5rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            border: 1px solid #2A2D7A33;
+        }
+        
+        .post-input {
+            width: 100%;
+            background: rgba(42, 45, 122, 0.3);
+            border: 1px solid var(--primary);
+            border-radius: 12px;
+            padding: 1rem;
+            color: var(--text);
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+            margin-bottom: 1rem;
+        }
+        
+        .post-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        .btn-primary {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 245, 160, 0.3);
+        }
+        
+        .post {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #2A2D7A33;
+        }
+        
+        .post-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .avatar {
+            font-size: 1.5rem;
+            margin-right: 0.75rem;
+        }
+        
+        .user-info {
+            flex: 1;
+        }
+        
+        .display-name {
+            font-weight: 600;
+            color: var(--text);
+        }
+        
+        .timestamp {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+        
+        .post-content {
+            margin-bottom: 1rem;
+            white-space: pre-line;
+        }
+        
+        .reactions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .reaction-btn {
+            background: rgba(42, 45, 122, 0.3);
+            border: 1px solid var(--primary);
+            color: var(--text-muted);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+        
+        .reaction-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        
+        .comments {
+            border-top: 1px solid #2A2D7A33;
+            padding-top: 1rem;
+        }
+        
+        .comment {
+            background: rgba(42, 45, 122, 0.2);
+            padding: 0.75rem;
+            border-radius: 12px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .comment-header {
+            font-size: 0.9rem;
+            color: var(--accent);
+            margin-bottom: 0.25rem;
+        }
+        
+        .features {
+            background: var(--surface);
+            padding: 1.5rem;
+            border-radius: 16px;
+            margin-top: 2rem;
+        }
+        
+        .features h3 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+        
+        .feature-list {
+            list-style: none;
+        }
+        
+        .feature-list li {
+            padding: 0.5rem 0;
+            color: var(--text-muted);
+        }
+        
+        .feature-list li:before {
+            content: "▸";
+            color: var(--accent);
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">AURA</div>
+        <div class="tagline">Intelligent Social Platform</div>
+    </div>
+    
+    <div class="container">
+        <div class="post-form">
+            <textarea 
+                class="post-input" 
+                placeholder="What's happening in your world? (This is a live demo)" 
+                id="postContent"
+            ></textarea>
+            <button class="btn-primary" onclick="addPost()">Post to Aura</button>
+        </div>
+        
+        <div id="postsContainer">
+            <!-- Posts will be loaded here -->
+        </div>
+        
+        <div class="features">
+            <h3>Coming Soon to Aura</h3>
+            <ul class="feature-list">
+                <li>Focus Flow - Chronological, clean feeds</li>
+                <li>Living Profiles - Dynamic digital identity</li>
+                <li>Smart Channels - Organized group spaces</li>
+                <li>Context-Aware AI - Intelligent interactions</li>
+                <li>Multi-format Messages - Text, voice, video seamlessly</li>
+                <li>Ephemeral Spaces - Temporary event rooms</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Load posts when page loads
+        document.addEventListener('DOMContentLoaded', loadPosts);
+        
+        async function loadPosts() {
+            try {
+                const response = await fetch('/api/posts');
+                const posts = await response.json();
+                displayPosts(posts);
+            } catch (error) {
+                console.error('Error loading posts:', error);
+            }
+        }
+        
+        function displayPosts(posts) {
+            const container = document.getElementById('postsContainer');
+            container.innerHTML = posts.map(post => `
+                <div class="post" id="post-${post.id}">
+                    <div class="post-header">
+                        <div class="avatar">${post.user_id === 1 ? '👨‍💻' : '🤖'}</div>
+                        <div class="user-info">
+                            <div class="display-name">${post.user_id === 1 ? 'John K.' : 'Aura Team'}</div>
+                            <div class="timestamp">${post.timestamp}</div>
+                        </div>
+                    </div>
+                    <div class="post-content">${post.content}</div>
+                    <div class="reactions">
+                        ${Object.entries(post.reactions).map(([reaction, count]) => `
+                            <button class="reaction-btn" onclick="reactToPost(${post.id}, '${reaction}')">
+                                ${reaction} ${count}
+                            </button>
+                        `).join('')}
+                    </div>
+                    ${post.comments.length > 0 ? `
+                        <div class="comments">
+                            ${post.comments.map(comment => `
+                                <div class="comment">
+                                    <div class="comment-header">
+                                        <strong>${comment.user}</strong> • ${comment.timestamp}
+                                    </div>
+                                    <div>${comment.text}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+        
+        async function addPost() {
+            const content = document.getElementById('postContent').value.trim();
+            if (!content) return;
+            
+            try {
+                const response = await fetch('/api/add_post', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({content})
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    document.getElementById('postContent').value = '';
+                    loadPosts(); // Reload posts to show the new one
+                }
+            } catch (error) {
+                console.error('Error adding post:', error);
+            }
+        }
+        
+        async function reactToPost(postId, reaction) {
+            try {
+                const response = await fetch(`/api/react/${postId}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({reaction})
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    loadPosts(); // Reload to update reaction counts
+                }
+            } catch (error) {
+                console.error('Error reacting to post:', error);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+
+{% block title %}Aura Admin Dashboard{% endblock %}
+
+{% block styles %}
+<style>
+    .admin-container {
+        max-width: 1200px;
+    }
+    
+    .admin-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .admin-title {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .admin-title h1 {
+        font-size: 2rem;
+        color: var(--accent);
+    }
+    
+    .admin-crown {
+        font-size: 2rem;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        border-left: 4px solid var(--accent);
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: var(--accent);
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+    
+    .admin-sections {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+    
+    .section {
+        min-height: 400px;
+    }
+    
+    .section h2 {
+        margin-bottom: 1rem;
+        color: var(--accent);
+        border-bottom: 1px solid #2A2D7A33;
+        padding-bottom: 0.5rem;
+    }
+    
+    .user-list, .post-list {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .user-item, .post-item {
+        background: rgba(42, 45, 122, 0.2);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 0.75rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .user-info, .post-info {
+        flex: 1;
+    }
+    
+    .user-name {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+    
+    .user-details, .post-details {
+        color: var(--text-muted);
+        font-size: 0.8rem;
+    }
+    
+    .admin-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .btn-sm {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+    }
+    
+    .post-content {
+        margin: 0.5rem 0;
+        white-space: pre-line;
+        background: rgba(0, 0, 0, 0.2);
+        padding: 0.5rem;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+    
+    @media (max-width: 768px) {
+        .admin-sections {
+            grid-template-columns: 1fr;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container admin-container">
+    <div class="admin-header">
+        <div class="admin-title">
+            <div class="admin-crown">👑</div>
+            <h1>Administrator Dashboard</h1>
+        </div>
+        <div class="user-menu">
+            <a href="/admin/reports" class="btn btn-primary">Reports</a>
+            <a href="/" class="btn btn-secondary">View Site</a>
+        </div>
+    </div>
+    
+    <div class="stats-grid" id="statsGrid">
+        <!-- Stats will be loaded here -->
+    </div>
+    
+    <div class="admin-sections">
+        <div class="card section">
+            <h2>User Management</h2>
+            <div class="user-list" id="userList">
+                <!-- Users will be loaded here -->
+            </div>
+        </div>
+        
+        <div class="card section">
+            <h2>Post Management</h2>
+            <div class="post-list" id="postList">
+                <!-- Posts will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', loadAdminData);
+    
+    async function loadAdminData() {
+        await loadStats();
+        await loadUsers();
+        await loadPosts();
+    }
+    
+    async function loadStats() {
+        try {
+            const response = await fetch('/api/admin/stats');
+            const result = await response.json();
+            
+            if (result.success) {
+                const stats = result.stats;
+                document.getElementById('statsGrid').innerHTML = `
+                    <div class="card stat-card">
+                        <div class="stat-number">${stats.total_users}</div>
+                        <div class="stat-label">Total Users</div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-number">${stats.total_posts}</div>
+                        <div class="stat-label">Total Posts</div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-number">${stats.active_users}</div>
+                        <div class="stat-label">Active Users</div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-number">${stats.pending_reports || 0}</div>
+                        <div class="stat-label">Pending Reports</div>
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error('Error loading stats:', error);
+        }
+    }
+    
+    async function loadUsers() {
+        try {
+            const response = await fetch('/api/admin/users');
+            const result = await response.json();
+            
+            if (result.success) {
+                const usersHtml = result.users.map(user => `
+                    <div class="user-item">
+                        <div class="user-info">
+                            <div class="user-name">
+                                ${user.avatar} ${user.display_name} 
+                                ${user.role === 'admin' ? '👑' : ''}
+                            </div>
+                            <div class="user-details">
+                                @${user.username} • ${user.email} • Joined ${user.joined_date}
+                            </div>
+                        </div>
+                        <div class="admin-actions">
+                            <span class="badge ${user.is_active ? 'badge-success' : 'badge-danger'}">
+                                ${user.is_active ? 'Active' : 'Inactive'}
+                            </span>
+                            ${user.role !== 'admin' ? `
+                                <button class="btn btn-sm btn-warning" onclick="toggleUser('${user.username}')">
+                                    ${user.is_active ? 'Deactivate' : 'Activate'}
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('');
+                
+                document.getElementById('userList').innerHTML = usersHtml;
+            }
+        } catch (error) {
+            console.error('Error loading users:', error);
+        }
+    }
+    
+    async function loadPosts() {
+        try {
+            const response = await fetch('/api/admin/posts');
+            const result = await response.json();
+            
+            if (result.success) {
+                const postsHtml = result.posts.map(post => `
+                    <div class="post-item">
+                        <div class="post-info">
+                            <div class="user-name">
+                                ${post.avatar} ${post.display_name}
+                            </div>
+                            <div class="post-details">
+                                @${post.username} • ${post.timestamp}
+                            </div>
+                            <div class="post-content">${post.content}</div>
+                            <div class="post-details">
+                                Reactions: ${Object.entries(post.reactions).map(([r, c]) => `${r}(${c})`).join(', ')}
+                                ${post.comments && post.comments.length > 0 ? `• Comments: ${post.comments.length}` : ''}
+                            </div>
+                        </div>
+                        <div class="admin-actions">
+                            <span class="badge ${post.is_approved ? 'badge-success' : 'badge-warning'}">
+                                ${post.is_approved ? 'Approved' : 'Pending'}
+                            </span>
+                            <button class="btn btn-sm btn-warning" onclick="togglePost(${post.post_id})">
+                                ${post.is_approved ? 'Unapprove' : 'Approve'}
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deletePost(${post.post_id})">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+                
+                document.getElementById('postList').innerHTML = postsHtml;
+            }
+        } catch (error) {
+            console.error('Error loading posts:', error);
+        }
+    }
+    
+    async function toggleUser(username) {
+        try {
+            const response = await fetch(`/api/admin/toggle_user/${username}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'}
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                showNotification(`User ${result.user.is_active ? 'activated' : 'deactivated'}`, 'success');
+                loadUsers();
+                loadStats();
+            }
+        } catch (error) {
+            console.error('Error toggling user:', error);
+            showNotification('Error updating user', 'error');
+        }
+    }
+    
+    async function togglePost(postId) {
+        try {
+            const response = await fetch(`/api/admin/toggle_post/${postId}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'}
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                showNotification(`Post ${result.post.is_approved ? 'approved' : 'unapproved'}`, 'success');
+                loadPosts();
+                loadStats();
+            }
+        } catch (error) {
+            console.error('Error toggling post:', error);
+            showNotification('Error updating post', 'error');
+        }
+    }
+    
+    async function deletePost(postId) {
+        if (confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
+            try {
+                const response = await fetch(`/api/admin/delete_post/${postId}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    showNotification('Post deleted successfully', 'success');
+                    loadPosts();
+                    loadStats();
+                }
+            } catch (error) {
+                console.error('Error deleting post:', error);
+                showNotification('Error deleting post', 'error');
+            }
+        }
+    }
+</script>
+{% endblock %}

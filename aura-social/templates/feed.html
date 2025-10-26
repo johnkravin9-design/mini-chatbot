@@ -1,0 +1,525 @@
+{% extends "base.html" %}
+
+{% block title %}Aura Feed - Intelligent Social Platform{% endblock %}
+
+{% block styles %}
+<style>
+    .welcome-banner {
+        background: linear-gradient(135deg, var(--primary), #3A2D7A);
+        padding: 2rem;
+        border-radius: 16px;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .welcome-banner h1 {
+        margin-bottom: 0.5rem;
+        font-size: 1.5rem;
+    }
+    
+    .post-form, .post {
+        margin-bottom: 1.5rem;
+    }
+    
+    .post-input {
+        min-height: 100px;
+        resize: vertical;
+        margin-bottom: 1rem;
+    }
+    
+    .post-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+        gap: 1rem;
+    }
+    
+    .post-avatar {
+        font-size: 1.5rem;
+    }
+    
+    .post-user-info {
+        flex: 1;
+    }
+    
+    .post-display-name {
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 0.1rem;
+    }
+    
+    .post-username {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+    
+    .post-timestamp {
+        color: var(--text-muted);
+        font-size: 0.8rem;
+    }
+    
+    .post-content {
+        margin-bottom: 1rem;
+        white-space: pre-line;
+        line-height: 1.6;
+    }
+    
+    .post-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .reactions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .reaction-btn {
+        background: rgba(42, 45, 122, 0.3);
+        border: 1px solid var(--primary);
+        color: var(--text-muted);
+        padding: 0.4rem 0.8rem;
+        border-radius: 16px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.8rem;
+    }
+    
+    .reaction-btn:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        transform: translateY(-1px);
+    }
+    
+    .reaction-btn.active {
+        background: var(--accent);
+        color: #000;
+        border-color: var(--accent);
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .comment-btn, .report-btn {
+        background: transparent;
+        border: 1px solid var(--text-muted);
+        color: var(--text-muted);
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s;
+    }
+    
+    .comment-btn:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+    
+    .report-btn {
+        border-color: var(--danger);
+        color: var(--danger);
+    }
+    
+    .report-btn:hover {
+        background: var(--danger);
+        color: white;
+    }
+    
+    /* Comments Section */
+    .comments-section {
+        margin-top: 1rem;
+        border-top: 1px solid #2A2D7A33;
+        padding-top: 1rem;
+    }
+    
+    .comment-form {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .comment-input {
+        flex: 1;
+        background: rgba(42, 45, 122, 0.2);
+        border: 1px solid var(--primary);
+        border-radius: 20px;
+        padding: 0.75rem 1rem;
+        color: var(--text);
+        font-size: 0.9rem;
+    }
+    
+    .comment-input:focus {
+        outline: none;
+        border-color: var(--accent);
+    }
+    
+    .comments-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .comment {
+        display: flex;
+        gap: 0.75rem;
+    }
+    
+    .comment-avatar {
+        font-size: 1rem;
+        margin-top: 0.25rem;
+    }
+    
+    .comment-content {
+        flex: 1;
+        background: rgba(42, 45, 122, 0.1);
+        padding: 0.75rem;
+        border-radius: 12px;
+        border: 1px solid #2A2D7A33;
+    }
+    
+    .comment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.25rem;
+    }
+    
+    .comment-author {
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .comment-time {
+        color: var(--text-muted);
+        font-size: 0.7rem;
+    }
+    
+    .comment-text {
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+    
+    .no-comments {
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        padding: 1rem;
+    }
+    
+    /* Report Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .modal-content {
+        width: 90%;
+        max-width: 500px;
+    }
+    
+    .modal-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-sm">
+    <div class="welcome-banner">
+        <h1>Welcome to your Focus Flow, {{ current_user.display_name }}! 👋</h1>
+        <p>This is your clean, chronological feed of meaningful connections</p>
+    </div>
+    
+    <div class="card post-form">
+        <textarea 
+            class="form-control form-textarea post-input" 
+            placeholder="What's happening in your world? Share your thoughts..." 
+            id="postContent"
+        ></textarea>
+        <button class="btn btn-primary" onclick="addPost()">Post to Aura</button>
+    </div>
+    
+    <div id="postsContainer">
+        <!-- Posts will be loaded here -->
+    </div>
+</div>
+
+<!-- Report Modal -->
+<div class="modal" id="reportModal">
+    <div class="modal-content">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Report Content</h3>
+                <p class="card-subtitle">Help keep Aura safe and respectful</p>
+            </div>
+            <form id="reportForm">
+                <input type="hidden" id="reportTargetType">
+                <input type="hidden" id="reportTargetId">
+                
+                <div class="form-group">
+                    <label class="form-label">Report Type</label>
+                    <select class="form-control" id="reportType" required>
+                        <option value="">Select a reason...</option>
+                        <!-- Options will be loaded dynamically -->
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Additional Details (Optional)</label>
+                    <textarea class="form-control form-textarea" id="reportDescription" 
+                              placeholder="Please provide any additional information that might help us understand the issue..."></textarea>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeReportModal()">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Submit Report</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let reportTypes = [];
+    let activeCommentSections = new Set();
+    
+    document.addEventListener('DOMContentLoaded', async () => {
+        await loadReportTypes();
+        await loadPosts();
+    });
+    
+    async function loadReportTypes() {
+        try {
+            const response = await fetch('/api/report/types');
+            const result = await response.json();
+            
+            if (result.success) {
+                reportTypes = result.types;
+                const select = document.getElementById('reportType');
+                select.innerHTML = '<option value="">Select a reason...</option>' +
+                    reportTypes.map(type => 
+                        `<option value="${type.value}">${type.label}</option>`
+                    ).join('');
+            }
+        } catch (error) {
+            console.error('Error loading report types:', error);
+        }
+    }
+    
+    async function loadPosts() {
+        try {
+            const response = await fetch('/api/posts');
+            const posts = await response.json();
+            displayPosts(posts);
+        } catch (error) {
+            console.error('Error loading posts:', error);
+        }
+    }
+    
+    function displayPosts(posts) {
+        const container = document.getElementById('postsContainer');
+        container.innerHTML = posts.map(post => `
+            <div class="card post" id="post-${post.post_id}">
+                <div class="post-header">
+                    <div class="post-avatar">${post.avatar}</div>
+                    <div class="post-user-info">
+                        <div class="post-display-name">${post.display_name}</div>
+                        <div class="post-username">@${post.username} • ${formatTime(post.timestamp)}</div>
+                    </div>
+                </div>
+                <div class="post-content">${post.content}</div>
+                <div class="post-actions">
+                    <div class="reactions">
+                        ${Object.entries(post.reactions).map(([reaction, count]) => `
+                            <button class="reaction-btn" onclick="reactToPost(${post.post_id}, '${reaction}')">
+                                ${reaction} ${count}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div class="action-buttons">
+                        <button class="comment-btn" onclick="toggleComments(${post.post_id})">
+                            💬 ${post.comments ? post.comments.length : 0}
+                        </button>
+                        <button class="report-btn" onclick="openReportModal('post', ${post.post_id})">
+                            Report
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Comments Section -->
+                <div class="comments-section" id="comments-${post.post_id}" style="display: none;">
+                    <div class="comment-form">
+                        <input type="text" class="comment-input" id="comment-input-${post.post_id}" placeholder="Write a comment..." onkeypress="if(event.key === 'Enter') addComment(${post.post_id})">
+                        <button class="btn btn-primary" onclick="addComment(${post.post_id})">Post</button>
+                    </div>
+                    <div class="comments-list" id="comments-list-${post.post_id}">
+                        ${post.comments && post.comments.length > 0 ? 
+                            post.comments.map(comment => `
+                                <div class="comment">
+                                    <div class="comment-avatar">${comment.avatar || '👤'}</div>
+                                    <div class="comment-content">
+                                        <div class="comment-header">
+                                            <span class="comment-author">${comment.display_name}</span>
+                                            <span class="comment-time">${formatTime(comment.timestamp)}</span>
+                                        </div>
+                                        <div class="comment-text">${comment.text}</div>
+                                    </div>
+                                </div>
+                            `).join('') : 
+                            '<div class="no-comments">No comments yet. Be the first to comment!</div>'
+                        }
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    function toggleComments(postId) {
+        const commentsSection = document.getElementById(`comments-${postId}`);
+        if (activeCommentSections.has(postId)) {
+            commentsSection.style.display = 'none';
+            activeCommentSections.delete(postId);
+        } else {
+            commentsSection.style.display = 'block';
+            activeCommentSections.add(postId);
+            document.getElementById(`comment-input-${postId}`).focus();
+        }
+    }
+    
+    async function addComment(postId) {
+        const commentInput = document.getElementById(`comment-input-${postId}`);
+        const content = commentInput.value.trim();
+        
+        if (!content) return;
+        
+        try {
+            // In a real app, you'd have a proper comment API
+            // For now, we'll simulate it
+            showNotification('Comment added!', 'success');
+            commentInput.value = '';
+            
+            // Refresh posts to show the new comment
+            await loadPosts();
+            
+        } catch (error) {
+            console.error('Error adding comment:', error);
+            showNotification('Error adding comment', 'error');
+        }
+    }
+    
+    function openReportModal(targetType, targetId) {
+        document.getElementById('reportTargetType').value = targetType;
+        document.getElementById('reportTargetId').value = targetId;
+        document.getElementById('reportModal').style.display = 'flex';
+    }
+    
+    function closeReportModal() {
+        document.getElementById('reportModal').style.display = 'none';
+        document.getElementById('reportForm').reset();
+    }
+    
+    document.getElementById('reportForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const targetType = document.getElementById('reportTargetType').value;
+        const targetId = document.getElementById('reportTargetId').value;
+        const reportType = document.getElementById('reportType').value;
+        const description = document.getElementById('reportDescription').value;
+        
+        if (!reportType) {
+            showNotification('Please select a report type', 'warning');
+            return;
+        }
+        
+        try {
+            const response = await fetch('/api/report', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    target_type: targetType,
+                    target_id: parseInt(targetId),
+                    report_type: reportType,
+                    description: description
+                })
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                showNotification('Thank you for your report. Our team will review it shortly.', 'success');
+                closeReportModal();
+            } else {
+                showNotification('Error submitting report: ' + result.error, 'error');
+            }
+        } catch (error) {
+            console.error('Error submitting report:', error);
+            showNotification('Error submitting report. Please try again.', 'error');
+        }
+    });
+    
+    async function addPost() {
+        const content = document.getElementById('postContent').value.trim();
+        if (!content) return;
+        
+        try {
+            const response = await fetch('/api/add_post', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({content})
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                document.getElementById('postContent').value = '';
+                showNotification('Post published successfully!', 'success');
+                loadPosts();
+            }
+        } catch (error) {
+            console.error('Error adding post:', error);
+            showNotification('Error creating post. Please try again.', 'error');
+        }
+    }
+    
+    async function reactToPost(postId, reaction) {
+        try {
+            const response = await fetch(`/api/react/${postId}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({reaction})
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                loadPosts();
+            }
+        } catch (error) {
+            console.error('Error reacting to post:', error);
+        }
+    }
+    
+    // Close modal when clicking outside
+    window.addEventListener('click', (e) => {
+        const modal = document.getElementById('reportModal');
+        if (e.target === modal) {
+            closeReportModal();
+        }
+    });
+</script>
+{% endblock %}
